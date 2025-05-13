@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n-key="appName">FB Ad Filler</title>
+  <style>
+    :root {
+      --primary-blue: #2563eb;
+      --primary-blue-dark: #1d4ed8;
+      --primary-green: #10b981;
+      --primary-green-dark: #059669;
+      --light-gray-bg: #f3f4f6;
+      --white: #ffffff;
+      --text-dark: #1f2937;
+      --text-light: #6b7280;
+      --border-color: #d1d5db;
+      --notice-bg: #fffbeb;
+      --notice-text: #92400e;
+      --notice-border: #fde68a;
+      --icon-gray: #6b7280;
+      --danger-red: #ef4444;
+      --danger-red-dark: #dc2626;
+      --copy-icon-color: #4b5563;
+      --tab-inactive-bg: #e5e7eb;
+      --tab-inactive-text: #4b5563;
+      --tab-active-bg: var(--white);
+      --tab-active-text: var(--primary-blue);
+      --tab-border: var(--border-color);
+      --link-color: #1e40af; /* For Lipa LIFE link */
+      --persona-section-bg: #eef2ff; /* Light indigo for persona sections */
+      --persona-list-item-hover: #f9fafb; /* Hover for persona list items */
+      --success-green: #10b981; /* Success color */
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--light-gray-bg);
+      width: 600px;
+      color: var(--text-dark);
+      font-size: 14px;
+      min-height: 520px;
+    }
+    /* Styles for dynamically generated header */
+    .header {
+      background: var(--primary-blue);
+      color: var(--white);
+      padding: 8px 15px;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+    .header-title {
+      flex-grow: 1;
+      text-align: left;
+    }
+    .design-by-link { /* Specific to main view header */
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: 400;
+    }
+    .design-by-link a {
+      color: var(--white);
+      text-decoration: none;
+      opacity: 0.8;
+    }
+    .design-by-link a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .header-controls {
+      display: flex;
+      align-items: center;
+    }
+    .header-icon {
+      cursor: pointer;
+      font-size: 20px;
+      padding: 5px;
+      margin-left: 8px;
+      color: var(--white);
+      opacity: 0.9;
+    }
+    .header-icon:hover {
+      opacity: 1;
+    }
+    .back-icon {
+      cursor: pointer;
+      font-size: 20px;
+      padding: 5px;
+      margin-right: 10px; /* Added margin for spacing */
+      color: var(--white);
+      opacity: 0.9;
+    }
+    .back-icon:hover {
+        opacity: 1;
+    }
+    /* End of header styles */
+
+    .content-wrapper {
+      padding: 15px;
+      max-height: calc(100vh - 50px); /* Adjust based on header height */
+      overflow-y: auto;
+    }
+    .main-content-grid {
+      display: flex;
+      gap: 15px;
+    }
+    .input-section, .preview-section {
+      flex: 1;
+      background: var(--white);
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .preview-section {
+        justify-content: space-between;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+    .section-title svg {
+      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+      color: var(--icon-gray);
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text-dark);
+    }
+    .form-group select, #optionsView select, #archiveView select, .form-group input[type="text"], #personaView textarea, #personaView input[type="text"], #personaListView select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: var(--white);
+      color: var(--text-dark);
+      box-sizing: border-box;
+    }
+    textarea#inputContent, #personaBaseDescription {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 100px;
+      flex-grow: 1;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      resize: vertical;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: none;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      flex-grow: 1;
+    }
+    button svg {
+      margin-right: 6px;
+      width: 16px;
+      height: 16px;
+    }
+    .btn-primary {
+      background: var(--primary-blue);
+      color: var(--white);
+    }
+    .btn-primary:hover {
+      background: var(--primary-blue-dark);
+    }
+    .btn-secondary {
+      background: var(--light-gray-bg);
+      color: var(--text-dark);
+      border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    .btn-danger {
+      background-color: var(--danger-red);
+      color: var(--white);
+    }
+    .btn-danger:hover {
+      background-color: var(--danger-red-dark);
+    }
+    .btn-success {
+        background-color: var(--primary-green);
+        color: var(--white);
+    }
+    .btn-success:hover {
+        background-color: var(--primary-green-dark);
+    }
+    .preview-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .preview-box {
+      padding: 10px;
+      background: var(--light-gray-bg);
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      position: relative;
+    }
+    .preview-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .preview-box-header strong {
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      color: var(--copy-icon-color);
+      flex-grow: 0;
+      min-width: auto;
+    }
+    .copy-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      margin-right: 0;
+    }
+    .copy-btn:hover {
+      color: var(--primary-blue);
+    }
+    .preview-box div[contenteditable="true"], .preview-box div.text-content-display {
+      color: var(--text-light);
+      min-height: 1.2em;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      padding: 4px;
+      border: 1px solid transparent;
+    }
+    .preview-box div[contenteditable="true"]:focus {
+      outline: 1px solid var(--primary-blue);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      background-color: var(--white);
+      border-color: var(--primary-blue);
+    }
+
+    #multiVersionTabsContainer {
+      margin-top: 15px;
+      border: 1px solid var(--tab-border);
+      border-radius: 6px;
+      background-color: var(--white);
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 200px;
+    }
+    .tab-navigation {
+      display: flex;
+      border-bottom: 1px solid var(--tab-border);
+    }
+    .tab-link {
+      padding: 10px 15px;
+      cursor: pointer;
+      background-color: var(--tab-inactive-bg);
+      color: var(--tab-inactive-text);
+      border: none;
+      border-right: 1px solid var(--tab-border);
+      font-weight: 500;
+      font-size: 13px;
+      flex-grow: 1;
+      text-align: center;
+      border-radius: 0;
+    }
+    .tab-link:first-child {
+        border-top-left-radius: 5px;
+    }
+    .tab-link:last-child {
+      border-right: none;
+      border-top-right-radius: 5px;
+    }
+    .tab-link.active {
+      background-color: var(--tab-active-bg);
+      color: var(--tab-active-text);
+      border-bottom: 2px solid var(--primary-blue);
+      margin-bottom: -1px;
+    }
+    .tab-content {
+      padding: 15px;
+      display: none;
+      overflow-y: auto;
+      flex-grow: 1;
+      max-height: 300px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .version-item {
+      margin-bottom: 12px;
+      padding: 10px;
+      background: var(--light-gray-bg);
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+    }
+    .version-item .preview-box-header strong {
+      font-size: 0.9em;
+    }
+    .version-item .text-content-display {
+      font-size: 0.9em;
+      color: var(--text-light);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-top: 5px;
+      padding: 0;
+      border: none;
+    }
+
+    #optionsView .content-wrapper, #infoView .content-wrapper, #archiveView .content-wrapper, #personaView .content-wrapper, #personaListView .content-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .form-container {
+      background: var(--white);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+      width: 100%;
+      max-width: 550px;
+    }
+    #optionsView label, #infoView h3, #archiveView h3, #personaView h3, #personaListView h3 {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    #optionsView input[type="password"], #optionsView select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    #optionsView button, #personaView button, #personaListView button {
+      width: auto;
+      flex-grow: 0;
+      margin-top: 5px;
+    }
+    #infoView p, #infoView ul {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+    }
+    #infoView ul {
+      padding-left: 20px;
+    }
+    #infoView strong {
+      font-weight: 600;
+    }
+    #systemPromptDisplay {
+      white-space: pre-wrap;
+      background-color: #f9fafb;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+      line-height: 1.5;
+      max-height: 250px;
+      overflow-y: auto;
+      margin-top: 10px;
+      color: #374151;
+    }
+    #archiveListContainer {
+      width: 100%;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .archive-item {
+      background: var(--light-gray-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .archive-item-details {
+      font-size: 13px;
+    }
+    .archive-item-details strong {
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+    .archive-item-details .archive-data {
+      color: var(--text-light);
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      margin-top: 2px;
+    }
+    .archive-item-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .archive-item-actions button {
+      flex-grow: 1;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    /* Persona View Specific Styles */
+    #generatedPersonaContainer {
+      margin-top: 20px;
+      width: 100%;
+    }
+    #generatedPersonaText {
+      width: 100%;
+      min-height: 200px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      background-color: var(--white);
+      color: var(--text-dark);
+      box-sizing: border-box;
+      resize: vertical;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    #generatedPersonaText:focus {
+      outline: 1px solid var(--primary-blue);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      border-color: var(--primary-blue);
+    }
+    #personaView .button-group {
+        justify-content: flex-start;
+    }
+    #personaView .button-group button {
+        flex-grow: 0;
+    }
+    .loading-placeholder {
+        color: var(--text-light);
+        font-style: italic;
+        padding: 10px;
+        text-align: center;
+    }
+    .error-message {
+        color: var(--danger-red);
+        font-weight: 500;
+        padding: 10px;
+        text-align: center;
+        border: 1px solid var(--danger-red);
+        background-color: #fee2e2;
+        border-radius: 6px;
+    }
+
+    /* Persona List View Specific Styles */
+    #personaListContainer {
+      width: 100%;
+      max-height: 400px; /* Adjust as needed */
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    .persona-list-item {
+      background: var(--white);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s ease;
+    }
+    .persona-list-item:hover {
+      background-color: var(--persona-list-item-hover);
+    }
+    .persona-list-item.active {
+        border-left: 4px solid var(--primary-green);
+        background-color: #f0fdf4;
+    }
+    .persona-list-item-details {
+      flex-grow: 1;
+      margin-right: 15px;
+      overflow: hidden;
+    }
+    .persona-list-item-details strong {
+      font-weight: 500;
+      color: var(--text-dark);
+      display: block;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .persona-list-item-details .persona-preview {
+      font-size: 13px;
+      color: var(--text-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .persona-list-item-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .persona-list-item-actions button {
+      flex-grow: 0;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .persona-list-item-actions button svg {
+        width: 14px;
+        height: 14px;
+        margin-right: 4px;
+    }
+    #emptyPersonaListMessage {
+        text-align: center;
+        color: var(--text-light);
+        margin-top: 20px;
+    }
+    #personaListView .button-group {
+        margin-top: 20px;
+        justify-content: flex-start;
+    }
+
+    /* Active Persona Display in Main View */
+    #activePersonaDisplayContainer {
+        background-color: var(--persona-section-bg);
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        overflow: hidden;
+    }
+    #activePersonaDisplayContainer span#activePersonaDisplay {
+        font-size: 13px;
+        color: var(--text-dark);
+        flex-grow: 1;
+        margin-right: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        min-width: 0;
+    }
+    #activePersonaDisplayContainer span strong {
+        font-weight: 600;
+    }
+    #activePersonaDisplayContainer span .no-persona {
+        font-style: italic;
+        color: var(--text-light);
+    }
+    #changePersonaBtn {
+        padding: 5px 8px;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    [data-i18n-key] {
+      /* outline: 1px dashed red; */
+    }
+  </style>
+</head>
+<body>
+
+  <div id="mainView">
+    <div class="header-placeholder"></div> <!-- Header placeholder -->
+    <div class="content-wrapper">
+      <div class="main-content-grid">
+        <div class="input-section">
+          <h2 class="section-title">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span data-i18n-key="inputContentTitle">Input Content</span>
+          </h2>
+          <div class="form-group">
+            <label for="copywriterSelect" data-i18n-key="copywriterStyleLabel">Copywriter Style:</label>
+            <select id="copywriterSelect">
+              <option value="David Ogilvy" data-i18n-key="ogilvyCopywriter">David Ogilvy</option>
+              <option value="Andreas Baulig" data-i18n-key="bauligCopywriter">Andreas Baulig</option>
+              <option value="Holger Jung" data-i18n-key="jungCopywriter">Holger Jung</option>
+              <option value="Eugene Schwartz" data-i18n-key="schwartzCopywriter">Eugene Schwartz</option>
+              <option value="Default" selected data-i18n-key="defaultCopywriter">Default (Expert Copywriter)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="formOfAddressSelect" data-i18n-key="formOfAddressLabel">Ansprache:</label>
+            <select id="formOfAddressSelect">
+              <option value="Du" selected data-i18n-key="formOfAddressDu">Du (informal)</option>
+              <option value="Sie" data-i18n-key="formOfAddressSie">Sie (formal)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+              <label data-i18n-key="activePersonaLabel">Aktive Persona:</label>
+              <div id="activePersonaDisplayContainer">
+                  <span id="activePersonaDisplay">
+                      <span class="no-persona" data-i18n-key="noActivePersonaSelected">Keine Persona ausgewählt</span>
+                  </span>
+                  <button id="changePersonaBtn" class="btn-secondary">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                      <span data-i18n-key="changePersonaButton">Ändern</span>
+                  </button>
+              </div>
+          </div>
+
+          <textarea id="inputContent" data-i18n-placeholder-key="inputContentPlaceholder" placeholder="Paste your landing page content, offer, or job description here..."></textarea>
+          <div class="button-group">
+            <button id="saveToArchiveBtn" class="btn-secondary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+              <span data-i18n-key="saveAdButton">Anzeige speichern</span>
+            </button>
+            <!-- Archive button removed from here -->
+            <button id="generateBtn" class="btn-primary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+              <span data-i18n-key="generateAdCopyButton">Generate Ad Copy (3 Versions)</span>
+            </button>
+          </div>
+        </div>
+        <div class="preview-section">
+          <h2 class="section-title">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            <span data-i18n-key="adPreviewTitle">Ad Preview</span>
+          </h2>
+          <div class="preview-content">
+            <div class="preview-box">
+              <div class="preview-box-header">
+                <strong data-i18n-key="primaryTextV1Title">Primary Text (Version 1)</strong>
+                <button id="copyPrimaryTextBtn" class="copy-btn" title="__MSG_copyButtonTitleGeneric__">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </button>
+              </div>
+              <div id="primaryText" contenteditable="true" class="text-content-display" data-i18n-key="willBeFilledText">Will be filled...</div>
+            </div>
+            <div class="preview-box">
+              <div class="preview-box-header">
+                <strong data-i18n-key="headlineV1Title">Headline (Version 1)</strong>
+                <button id="copyHeadlineBtn" class="copy-btn" title="__MSG_copyButtonTitleGeneric__">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </button>
+              </div>
+              <div id="headline" contenteditable="true" class="text-content-display" data-i18n-key="willBeFilledText">Will be filled...</div>
+            </div>
+            <div class="preview-box">
+              <div class="preview-box-header">
+                <strong data-i18n-key="descriptionV1Title">Description (Version 1)</strong>
+                <button id="copyDescriptionBtn" class="copy-btn" title="__MSG_copyButtonTitleGeneric__">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </button>
+              </div>
+              <div id="description" contenteditable="true" class="text-content-display" data-i18n-key="willBeFilledText">Will be filled...</div>
+            </div>
+
+            <div id="multiVersionTabsContainer" style="margin-top: 15px; display: none;">
+              <div class="tab-navigation">
+                <button class="tab-link active" data-tab="primaryTextsTabContent" data-i18n-key="tabPrimaryTexts">Primary Texts</button>
+                <button class="tab-link" data-tab="headlinesTabContent" data-i18n-key="tabHeadlines">Headlines</button>
+                <button class="tab-link" data-tab="descriptionsTabContent" data-i18n-key="tabDescriptions">Descriptions</button>
+              </div>
+
+              <div id="primaryTextsTabContent" class="tab-content active">
+                <p data-i18n-key="tabGenerateAdCopyMessage">Generate ad copy to see versions here.</p>
+              </div>
+              <div id="headlinesTabContent" class="tab-content">
+                 <p data-i18n-key="tabGenerateAdCopyMessage">Generate ad copy to see versions here.</p>
+              </div>
+              <div id="descriptionsTabContent" class="tab-content">
+                 <p data-i18n-key="tabGenerateAdCopyMessage">Generate ad copy to see versions here.</p>
+              </div>
+            </div>
+
+          </div>
+          <div class="button-group" style="margin-top:10px;">
+            <button id="resetBtn" class="btn-secondary">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /> </svg>
+              <span data-i18n-key="resetButton">Reset</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="optionsView" style="display: none;">
+    <div class="header-placeholder"></div> <!-- Header placeholder -->
+    <div class="content-wrapper">
+      <div class="form-container">
+        <div class="form-group">
+          <label for="apiKeyInput" data-i18n-key="apiKeyLabel">OpenAI API Key</label>
+          <input type="password" id="apiKeyInput" data-i18n-placeholder-key="apiKeyPlaceholder" placeholder="Enter your API key...">
+        </div>
+        <div class="form-group" style="margin-bottom: 5px;">
+          <p style="font-size: 12px; text-align: center; margin-top: -10px; margin-bottom: 15px;">
+            <span data-i18n-key="apiKeyInfoText">You can get your OpenAI API key</span>
+            <a href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--primary-blue); text-decoration: underline;" data-i18n-key="apiKeyLinkText">here</a>.
+          </p>
+        </div>
+        <div class="form-group">
+          <label for="modelSelect" data-i18n-key="modelLabel">ChatGPT Model:</label>
+          <select id="modelSelect">
+            <option value="gpt-4o" data-i18n-key="modelGpt4o">GPT-4o (Latest)</option>
+            <option value="gpt-4-turbo" data-i18n-key="modelGpt4Turbo">GPT-4 Turbo</option>
+            <option value="gpt-4" data-i18n-key="modelGpt4">GPT-4</option>
+            <option value="gpt-3.5-turbo" data-i18n-key="modelGpt35Turbo">GPT-3.5 Turbo</option>
+          </select>
+        </div>
+        <button id="saveSettingsBtn" class="btn-primary" data-i18n-key="saveSettingsButton">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="infoView" style="display: none;">
+    <div class="header-placeholder"></div> <!-- Header placeholder -->
+    <div class="content-wrapper">
+      <div class="form-container">
+        <h3 data-i18n-key="aboutTitle">About FB Ad Filler</h3>
+        <p data-i18n-key="aboutText">This Chrome extension helps you generate compelling ad copy for Facebook Ads using AI.</p>
+
+        <h3 data-i18n-key="howToUseTitle">How to Use:</h3>
+        <p data-i18n-key="howToUseIntro">Here's how to use the extension:</p>
+        <ul>
+          <li data-i18n-html-key="howToUseStepInput"><strong>Input Content:</strong> Paste your product description, landing page text, or offer details into the "Input Content" area.</li>
+          <li data-i18n-html-key="howToUseStepStyle"><strong>Copywriter Style & Ansprache:</strong> Select a famous copywriter's style (or default) and choose the form of address (Du/Sie).</li>
+          <li data-i18n-html-key="howToUseStepPersona"><strong>Persona (Header 👤 Icon / 👥 Icon):</strong> Click the "Single Person" icon (👤) in the header to create/edit a persona. Click the "Multiple Persons" icon (👥) to view the list of saved personas. To create: navigate to the persona creation view (via 👤 or "Neue Persona erstellen" from the list), enter a base description, then "Persona generieren (KI)". Review and "Persona zur Liste hinzufügen".</li>
+          <li data-i18n-html-key="howToUseStepPersonaList"><strong>Select Active Persona (Header 👥 Icon):</strong> Click the "Multiple Persons" icon (👥) in the header. This takes you to the list of saved personas. Select a persona to make it active. The active persona is shown in the main view.</li>
+          <li data-i18n-html-key="howToUseStepGenerate"><strong>Generate (3 Versions):</strong> Click "Generate Ad Copy (3 Versions)" to create Primary Text, Headline, and Description using the currently <strong style='color: var(--primary-green);'>active persona</strong>. The tool will attempt to generate 3 versions. All generated versions will be shown in tabs. Ensure a persona is selected first! If no persona is active, you will be prompted.</li>
+          <li data-i18n-html-key="howToUseStepReviewV1"><strong>Review & Copy (Version 1):</strong> The first generated version is shown in the main "Ad Preview" boxes. These fields are editable. Click the copy icon next to each field (Primary Text, Headline, Description) to copy that part of Version 1 to your clipboard.</li>
+          <li data-i18n-html-key="howToUseStepReviewTabs"><strong>Review & Copy (All Versions - Tabs):</strong> Below the Version 1 preview, a tabbed section will appear.
+            <ul>
+              <li data-i18n-html-key="howToUseStepReviewTabsSub1">Click on "Primary Texts", "Headlines", or "Descriptions" tabs.</li>
+              <li data-i18n-html-key="howToUseStepReviewTabsSub2">Each tab shows all generated versions (e.g., Version 1, Version 2, Version 3) for that specific ad component.</li>
+              <li data-i18n-html-key="howToUseStepReviewTabsSub3">Click the copy icon next to any version's text to copy it.</li>
+            </ul>
+          </li>
+          <li data-i18n-html-key="howToUseStepSaveAd"><strong>Save Ad:</strong> Click "Save Ad" to store the current input, selections, and all generated ad versions to the archive.</li>
+          <li data-i18n-html-key="howToUseStepArchive"><strong>Archive (Header 🗃️ Icon):</strong> Click the "Treasure Chest" icon in the header to view, load, or delete previously saved ad sets. Loading an ad set will restore all its versions.</li>
+          <li data-i18n-html-key="howToUseStepReset"><strong>Reset:</strong> Click "Reset" to clear the input and all preview fields (including tabs). Your selected persona remains active.</li>
+        </ul>
+
+        <h3 data-i18n-key="settingsInfoTitle">Settings (Header ⚙️ Icon):</h3>
+        <p data-i18n-html-key="settingsInfoText">You <strong>must</strong> configure your OpenAI API key and can select your preferred ChatGPT model in the settings. Click the gear icon (⚙️) in the header to access settings. GPT-4o is selected by default.</p>
+
+        <h3 data-i18n-key="troubleshootingTitle">Troubleshooting:</h3>
+        <ul>
+          <li data-i18n-html-key="troubleshootingNoText"><strong>No text generated:</strong> Check if your API key is correctly entered and has credits. Ensure a persona is selected (you'll be prompted if not). Also, check your internet connection and the selected model's accessibility.</li>
+          <li data-i18n-html-key="troubleshootingFormatting"><strong>Text formatting:</strong> The AI tries to use paragraphs and bullet points where appropriate. If the formatting isn't perfect, you may need to make minor adjustments after pasting or directly in the editable Version 1 fields.</li>
+        </ul>
+
+        <h3 data-i18n-key="systemPromptInfoTitle">System Prompt Used for Generation:</h3>
+        <p data-i18n-key="systemPromptInfoText">The following prompt (reflecting your current selections for copywriter, address form, and the <strong style='color: var(--primary-green);'>active persona</strong>) is used to instruct the AI:</p>
+        <pre id="systemPromptDisplay"></pre>
+
+        <p data-i18n-html-key="happyAdCreatingText"><em>Happy Ad Creating!</em></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="archiveView" style="display: none;">
+    <div class="header-placeholder"></div> <!-- Header placeholder -->
+    <div class="content-wrapper">
+      <div class="form-container">
+        <h3 data-i18n-key="savedAdCopiesTitle">Saved Ad Copies</h3>
+        <div id="archiveListContainer">
+          <!-- Archived items will be dynamically added here -->
+        </div>
+        <p id="emptyArchiveMessage" style="display: none; text-align: center; color: var(--text-light); margin-top: 20px;" data-i18n-key="emptyArchiveMessageText">Your archive is empty. Save an ad to see it here.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="personaView" style="display: none;"> <!-- Persona Create/Edit View -->
+    <div class="header-placeholder"></div> <!-- Header placeholder -->
+    <div class="content-wrapper">
+      <div class="form-container">
+        <h3 data-i18n-key="personaInputTitle">Persona erstellen / bearbeiten</h3>
+        <div class="form-group">
+          <label for="personaBaseDescription" data-i18n-key="personaBaseDescriptionLabel">Basisbeschreibung der Zielgruppe:</label>
+          <textarea id="personaBaseDescription" data-i18n-placeholder-key="personaBaseDescriptionPlaceholder" placeholder="Geben Sie eine kurze Beschreibung Ihrer Zielgruppe ein oder übernehmen Sie sie aus dem Hauptfenster..."></textarea>
+        </div>
+        <div class="button-group">
+            <button id="generatePersonaBtn" class="btn-primary">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              <span data-i18n-key="generatePersonaButton">Persona generieren (KI)</span>
+            </button>
+        </div>
+
+        <div id="generatedPersonaContainer" style="margin-top: 20px;">
+           <label for="generatedPersonaText" data-i18n-key="generatedPersonaLabel">Generierte Persona:</label>
+           <textarea id="generatedPersonaText" data-i18n-placeholder-key="generatedPersonaPlaceholder" placeholder="Die generierte Persona wird hier angezeigt..."></textarea>
+           <div id="personaLoadingErrorPlaceholder"></div>
+        </div>
+
+        <div class="button-group" style="margin-top: 20px;">
+            <button id="saveCurrentPersonaBtn" class="btn-primary" style="display: none;">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+              <span data-i18n-key="savePersonaToListButton">Persona zur Liste hinzufügen</span>
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="personaListView" style="display: none;"> <!-- Persona List View -->
+      <div class="header-placeholder"></div> <!-- Header placeholder -->
+      <div class="content-wrapper">
+          <div class="form-container">
+              <h3 data-i18n-key="selectActivePersonaTitle">Aktive Persona auswählen</h3>
+              <div id="personaListContainer">
+                  <!-- Persona list items will be dynamically added here -->
+              </div>
+              <p id="emptyPersonaListMessage" style="display: none;" data-i18n-key="emptyPersonaListMessageText">Keine Personas gespeichert. Erstellen Sie eine neue Persona.</p>
+              <div class="button-group">
+                  <button id="createNewPersonaBtn" class="btn-primary">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      <span data-i18n-key="createNewPersonaButton">Neue Persona erstellen</span>
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
