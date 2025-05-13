@@ -263,20 +263,51 @@
     .copy-btn:hover {
       color: var(--primary-blue);
     }
-    .preview-box div[contenteditable="true"], .preview-box div.text-content-display {
+
+    /* Styles for contenteditable fields in main preview (V1) */
+    #primaryText[contenteditable="true"],
+    #headline[contenteditable="true"],
+    #description[contenteditable="true"] {
+      color: var(--text-dark); /* Darker text for better readability/editability */
+      min-height: 1.5em; /* Slightly more min-height */
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      padding: 6px 8px; /* Adjusted padding */
+      border: 1px solid var(--border-color); /* Visible border */
+      border-radius: 4px; /* Rounded corners for the editable field itself */
+      background-color: var(--white); /* White background to stand out */
+      cursor: text; /* Explicit text cursor */
+      line-height: 1.4;
+    }
+
+    #primaryText[contenteditable="true"]:focus,
+    #headline[contenteditable="true"]:focus,
+    #description[contenteditable="true"]:focus {
+      outline: 1px solid var(--primary-blue);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      border-color: var(--primary-blue);
+    }
+
+    /* Styles for non-editable text display (e.g., in tabs, or if a field becomes non-editable) */
+    .preview-box div.text-content-display:not([contenteditable="true"]) {
       color: var(--text-light);
       min-height: 1.2em;
       word-wrap: break-word;
       white-space: pre-wrap;
       padding: 4px;
-      border: 1px solid transparent;
+      border: 1px solid transparent; /* No border for non-editable display */
     }
-    .preview-box div[contenteditable="true"]:focus {
-      outline: 1px solid var(--primary-blue);
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-      background-color: var(--white);
-      border-color: var(--primary-blue);
+    
+    /* Fallback for general .text-content-display if not covered by above (e.g. if contenteditable is removed dynamically) */
+    .preview-box div.text-content-display {
+        color: var(--text-light);
+        min-height: 1.2em;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        padding: 4px;
+        border: 1px solid transparent;
     }
+
 
     #multiVersionTabsContainer {
       margin-top: 15px;
@@ -338,14 +369,15 @@
     .version-item .preview-box-header strong {
       font-size: 0.9em;
     }
+    /* This targets the non-editable text display within version items specifically */
     .version-item .text-content-display {
       font-size: 0.9em;
       color: var(--text-light);
       white-space: pre-wrap;
       word-wrap: break-word;
       margin-top: 5px;
-      padding: 0;
-      border: none;
+      padding: 0; /* Reset padding if needed for tab items */
+      border: none; /* Ensure no border for tab items */
     }
 
     #optionsView .content-wrapper, #infoView .content-wrapper, #archiveView .content-wrapper, #personaView .content-wrapper, #personaListView .content-wrapper {

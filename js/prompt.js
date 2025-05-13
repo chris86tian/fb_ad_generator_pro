@@ -35,6 +35,7 @@ Die Description sollte die Headline ergänzen oder einen Call-to-Action enthalte
   // Use the detailed persona text if provided
   if (detailedPersonaText && detailedPersonaText.trim() !== '') {
     prompt += `\nBerücksichtige bei der Texterstellung die folgende detaillierte Zielgruppen-Persona:\n---\n${detailedPersonaText}\n---\n`;
+    prompt += `WICHTIG: Auch wenn die obenstehende Persona-Beschreibung einen Namen enthält (z.B. "Das ist Erika..."), verwende diesen Namen NIEMALS in den Werbetexten. Sprich die Zielgruppe ausschließlich mit der gewählten Anredeform "${formOfAddress}" an und beziehe dich auf ihre Eigenschaften, Bedürfnisse und Probleme, aber nicht auf ihren Namen.\n`;
   } else {
     // Fallback or warning if no persona is provided - though adGeneration.js should prevent this
     prompt += `\nAchtung: Keine spezifische Persona zur Verfügung gestellt. Erstelle allgemeine Texte.\n`;

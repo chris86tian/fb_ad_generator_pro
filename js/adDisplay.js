@@ -23,13 +23,15 @@ function createVersionItemElement(versionNumber, type, text, fullVersionTextForC
     copyBtn.innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
     
     const textToCopy = fullVersionTextForCopy || text || '';
-    copyBtn.addEventListener('click', () => copyToClipboard(textToCopy, copyBtn));
+    // Use a descriptive string for the field name when calling copyToClipboard
+    const descriptiveName = `${type} Version ${versionNumber}`;
+    copyBtn.addEventListener('click', () => copyToClipboard(textToCopy, descriptiveName));
 
     header.appendChild(strong);
     header.appendChild(copyBtn);
 
     const contentDisplay = document.createElement('div');
-    contentDisplay.className = 'text-content-display';
+    contentDisplay.className = 'text-content-display'; // This is NOT contenteditable
     contentDisplay.textContent = text || (chrome.i18n.getMessage('notFoundText') || 'Not found');
 
     item.appendChild(header);
@@ -66,8 +68,7 @@ export function displayAdVersionsInTabs(adVersions) {
 
     adVersions.forEach((version, index) => {
         const versionNumber = index + 1;
-        // const fullAdTextForVersion = `Primary Text:\n${version.primaryText || ''}\n\nHeadline:\n${version.headline || ''}\n\nDescription:\n${version.description || ''}`;
-
+        
         if (version.primaryText) {
             primaryTextsTabContent.appendChild(createVersionItemElement(versionNumber, 'Primary Text', version.primaryText, version.primaryText));
         } else {
@@ -114,6 +115,7 @@ export function updateAngleAdsContainerPlaceholder(showPlaceholder) {
         if (multiVersionTabsContainer) multiVersionTabsContainer.style.display = 'none';
     } else {
         // If not showing placeholder, it means content is coming or tabs are shown
+        // The V1 fields will be populated by loadAndDisplayAdsFromStorage or adGeneration
         if (multiVersionTabsContainer) multiVersionTabsContainer.style.display = 'block';
     }
 }
@@ -140,7 +142,6 @@ export async function loadAndDisplayAdsFromStorage() {
     const rawResponse = result[STORAGE_KEY_LAST_RAW_RESPONSE];
 
     const notFoundMsg = chrome.i18n.getMessage('notFoundText') || 'Not found';
-    // Use angleAdsPlaceholderText for V1 fields when nothing is loaded initially or parsing fails
     const initialPlaceholderMsg = chrome.i18n.getMessage('angleAdsPlaceholderText') || 'Wird nach Generierung mit Version 1 gefüllt...';
 
     if (rawResponse) {
@@ -154,27 +155,26 @@ export async function loadAndDisplayAdsFromStorage() {
             if (dom.headlineField) dom.headlineField.innerText = v1.headline || notFoundMsg;
             if (dom.descriptionField) dom.descriptionField.innerText = v1.description || notFoundMsg;
 
-            displayAdVersionsInTabs(adVersions); // This handles tab placeholders internally
-            updateAngleAdsContainerPlaceholder(false); // Hide main placeholder, show V1 and tabs
+            displayAdVersionsInTabs(adVersions); 
+            updateAngleAdsContainerPlaceholder(false); 
         } else {
             console.warn("Could not parse ad versions from stored raw response, or no versions found.");
             if (dom.primaryTextField) dom.primaryTextField.innerText = initialPlaceholderMsg;
             if (dom.headlineField) dom.headlineField.innerText = initialPlaceholderMsg;
             if (dom.descriptionField) dom.descriptionField.innerText = initialPlaceholderMsg;
-            updateAngleAdsContainerPlaceholder(true); // Show V1 placeholder
-            updateTabPlaceholders(true); // Show tab placeholders
-            // Clear tab content if parsing fails
-            if (dom.primaryTextsTabContent) dom.primaryTextsTabContent.innerHTML = '';
-            if (dom.headlinesTabContent) dom.headlinesTabContent.innerHTML = '';
-            if (dom.descriptionsTabContent) dom.descriptionsTabContent.innerHTML = '';
-            if (dom.multiVersionTabsContainer) dom.multiVersionTabsContainer.style.display = 'block'; // Keep tabs visible
+            // updateAngleAdsContainerPlaceholder(true); // This would hide tabs if called here
+            updateTabPlaceholders(true); 
+            if (dom.primaryTextsTabContent) dom.primaryTextsTabContent.innerHTML = `<p>${chrome.i18n.getMessage('tabGenerateAdCopyMessage')}</p>`;
+            if (dom.headlinesTabContent) dom.headlinesTabContent.innerHTML = `<p>${chrome.i18n.getMessage('tabGenerateAdCopyMessage')}</p>`;
+            if (dom.descriptionsTabContent) dom.descriptionsTabContent.innerHTML = `<p>${chrome.i18n.getMessage('tabGenerateAdCopyMessage')}</p>`;
+            if (dom.multiVersionTabsContainer) dom.multiVersionTabsContainer.style.display = 'block';
         }
     } else {
         console.log("No raw response found in storage. Displaying placeholders.");
         if (dom.primaryTextField) dom.primaryTextField.innerText = initialPlaceholderMsg;
         if (dom.headlineField) dom.headlineField.innerText = initialPlaceholderMsg;
         if (dom.descriptionField) dom.descriptionField.innerText = initialPlaceholderMsg;
-        updateAngleAdsContainerPlaceholder(true);
-        updateTabPlaceholders(true);
+        updateAngleAdsContainerPlaceholder(true); // This will hide tabs
+        updateTabPlaceholders(true); // This sets placeholder text for tabs (which are hidden by previous line)
     }
 }
