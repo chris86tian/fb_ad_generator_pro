@@ -1,69 +1,82 @@
-/**
- * Copies the provided text to the clipboard and provides user feedback.
- * @param {string} text - The text to copy.
- * @param {string} fieldName - A descriptive name of the field being copied (for feedback).
- */
-export function copyToClipboard(text, fieldName) {
-  // Define texts that should not be copied
-  const nonCopyableTexts = [
-    chrome.i18n.getMessage('naText'),
-    chrome.i18n.getMessage('willBeFilledText'),
-    chrome.i18n.getMessage('generatingText'),
-    chrome.i18n.getMessage('errorGeneratingText'),
-    chrome.i18n.getMessage('notFoundText'),
-    chrome.i18n.getMessage('couldNotParseText'),
-    "", // Empty string
-    null, // Null value
-    undefined // Undefined value
-  ];
-
-  // Check if the text is null, undefined, or in the non-copyable list
-  if (text == null || nonCopyableTexts.includes(text.trim())) {
-    console.log(`Copy prevented for field "${fieldName}": Text is non-copyable or empty.`);
-    // Optionally provide visual feedback that copy failed/was prevented
-    // e.g., temporarily change button style or show a small message
-    return;
-  }
-
-  navigator.clipboard.writeText(text)
-    .then(() => {
-      console.log(`"${fieldName}" copied to clipboard.`);
-      // Optional: Provide visual feedback for success (e.g., change button icon/text briefly)
-      // Example: Find the button related to this fieldName and update it
-    })
-    .catch(err => {
-      console.error(`Error copying "${fieldName}" to clipboard: `, err);
-      alert(chrome.i18n.getMessage('copyErrorAlert', [fieldName]));
-    });
+// Helper function to copy text to clipboard and show feedback
+export function copyToClipboard(text, descriptiveName = 'Text') {
+    if (!text) {
+        console.warn(`Attempted to copy empty ${descriptiveName} to clipboard`);
+        return;
+    }
+    
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            console.log(`${descriptiveName} copied to clipboard`);
+            showCopyFeedback(descriptiveName);
+        })
+        .catch(err => {
+            console.error(`Could not copy ${descriptiveName} to clipboard:`, err);
+        });
 }
 
-/**
- * Sets up copy listeners for the main ad fields (Primary Text, Headline, Description).
- */
+// Show a temporary feedback message when text is copied
+function showCopyFeedback(descriptiveName) {
+    // Create a feedback element if it doesn't exist
+    let feedbackEl = document.getElementById('copyFeedback');
+    if (!feedbackEl) {
+        feedbackEl = document.createElement('div');
+        feedbackEl.id = 'copyFeedback';
+        feedbackEl.style.position = 'fixed';
+        feedbackEl.style.bottom = '20px';
+        feedbackEl.style.left = '50%';
+        feedbackEl.style.transform = 'translateX(-50%)';
+        feedbackEl.style.backgroundColor = 'var(--primary-green, #10b981)';
+        feedbackEl.style.color = 'white';
+        feedbackEl.style.padding = '8px 16px';
+        feedbackEl.style.borderRadius = '4px';
+        feedbackEl.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        feedbackEl.style.zIndex = '1000';
+        feedbackEl.style.opacity = '0';
+        feedbackEl.style.transition = 'opacity 0.3s ease';
+        document.body.appendChild(feedbackEl);
+    }
+
+    // Set the message and show the feedback
+    const copiedText = chrome.i18n.getMessage('copiedToClipboardText') || 'copied to clipboard';
+    feedbackEl.textContent = `${descriptiveName} ${copiedText}`;
+    feedbackEl.style.opacity = '1';
+
+    // Hide the feedback after a delay
+    setTimeout(() => {
+        feedbackEl.style.opacity = '0';
+    }, 2000);
+}
+
+// Setup copy button listeners for the main preview section
 export function setupCopyButtonListeners() {
-    const mainFields = [
-        // Corrected IDs to match popup.html
-        { btnId: 'copyPrimaryTextBtn', fieldId: 'primaryText', nameKey: 'primaryTextLabel' },
-        { btnId: 'copyHeadlineBtn', fieldId: 'headline', nameKey: 'headlineLabel' },
-        { btnId: 'copyDescriptionBtn', fieldId: 'description', nameKey: 'descriptionLabel' }
+    const copyButtons = [
+        { 
+            btn: document.getElementById('copyPrimaryTextBtn'), 
+            textElement: document.getElementById('primaryText'),
+            descriptiveName: chrome.i18n.getMessage('primarytextVLabel') || 'Primary Text'
+        },
+        { 
+            btn: document.getElementById('copyHeadlineBtn'), 
+            textElement: document.getElementById('headline'),
+            descriptiveName: chrome.i18n.getMessage('headlineVLabel') || 'Headline'
+        },
+        { 
+            btn: document.getElementById('copyDescriptionBtn'), 
+            textElement: document.getElementById('description'),
+            descriptiveName: chrome.i18n.getMessage('descriptionVLabel') || 'Description'
+        }
     ];
 
-    mainFields.forEach(field => {
-        const button = document.getElementById(field.btnId);
-        const textElement = document.getElementById(field.fieldId);
-        const fieldName = chrome.i18n.getMessage(field.nameKey); // Get localized name
-
-        if (button && textElement) {
-            button.addEventListener('click', () => {
-                // Use dataset.originalContent if available, otherwise use innerText
-                const textToCopy = textElement.dataset.originalContent || textElement.innerText;
-                copyToClipboard(textToCopy, fieldName);
+    copyButtons.forEach(item => {
+        if (item.btn && item.textElement) {
+            item.btn.addEventListener('click', () => {
+                copyToClipboard(item.textElement.innerText, item.descriptiveName);
             });
-        } else {
-            console.warn(`Copy button (${field.btnId}) or text element (${field.fieldId}) not found.`);
+        } else if (!item.btn) {
+            console.warn(`Copy button not found for ${item.descriptiveName}`);
+        } else if (!item.textElement) {
+            console.warn(`Text element not found for ${item.descriptiveName}`);
         }
     });
-
-    // Note: Listeners for copy buttons within the tabs (version-item)
-    // are added dynamically in adDisplay.js when the items are created.
 }

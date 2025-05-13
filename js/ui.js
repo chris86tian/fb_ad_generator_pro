@@ -1,24 +1,24 @@
 // Remove parseAdVersions, displayAdVersionsInTabs, createVersionItemElement, copyToClipboard
-// Keep showView, switchTab (if used elsewhere, otherwise move switchTab to adDisplay.js)
+// Keep showView
 
 import * as dom from './dom.js';
 import { getSystemPrompt } from './prompt.js';
 import { loadSettingsForOptionsPage } from './storage.js';
 import { renderArchiveList } from './archive.js';
-import { getActivePersonaDetails } from './adGeneration.js'; // Import helper if needed here, or keep in adGeneration
+import { getActivePersonaDetails } from './adGeneration.js';
 
 export const views = {
     main: dom.mainView,
     options: dom.optionsView,
     info: dom.infoView,
     archive: dom.archiveView,
-    personaView: dom.personaView, // Add persona create/edit view
-    personaListView: dom.personaListView // Add persona list view
+    personaView: dom.personaView,
+    personaListView: dom.personaListView
 };
 
 
 export function showView(viewName) {
-    console.log(`Switching to view: ${viewName}`); // Log view switching
+    console.log(`Switching to view: ${viewName}`);
     Object.keys(views).forEach(key => {
         if (views[key]) {
             views[key].style.display = (key === viewName) ? 'block' : 'none';
@@ -27,16 +27,14 @@ export function showView(viewName) {
         }
     });
 
-    // --- Header Button Visibility ---
     const backButtonTitle = chrome.i18n.getMessage('backButton');
 
-    // Configure Back Buttons
     const backButtons = [
         { btn: dom.backToMainBtnFromOptions, view: 'options' },
         { btn: dom.backToMainBtnFromInfo, view: 'info' },
         { btn: dom.backToMainBtnFromArchive, view: 'archive' },
-        { btn: dom.backToMainBtnFromPersona, view: 'personaView' }, // Back from Persona Create/Edit
-        { btn: dom.backToPersonaViewBtn, view: 'personaListView' } // Back from Persona List
+        { btn: dom.backToMainBtnFromPersona, view: 'personaView' },
+        { btn: dom.backToPersonaViewBtn, view: 'personaListView' }
     ];
 
     backButtons.forEach(item => {
@@ -46,20 +44,17 @@ export function showView(viewName) {
         }
     });
 
-    // Configure Main Header Controls (Info, Options, Archive, Persona List buttons)
     const mainHeaderControls = document.querySelector('#mainView .header-controls');
     if (mainHeaderControls) {
         mainHeaderControls.style.display = (viewName === 'main') ? 'flex' : 'none';
     }
 
-    // --- View Specific Logic ---
     if (viewName === 'info' && dom.systemPromptDisplay) {
-        // Update system prompt display based on current selections + active persona
-        (async () => { // Use async IIFE to await persona details
+        (async () => {
             const currentCopywriter = dom.copywriterSelect ? dom.copywriterSelect.value : "Default";
             const currentAddressForm = dom.formOfAddressSelect ? dom.formOfAddressSelect.value : "Du";
-            const activePersona = await getActivePersonaDetails(); // Fetch active persona
-            const personaText = activePersona ? activePersona.generatedText : ""; // Get its text
+            const activePersona = await getActivePersonaDetails();
+            const personaText = activePersona ? activePersona.generatedText : "";
             dom.systemPromptDisplay.innerText = getSystemPrompt(currentCopywriter, currentAddressForm, personaText);
         })();
     }
@@ -69,19 +64,16 @@ export function showView(viewName) {
     if (viewName === 'archive') {
         renderArchiveList();
     }
-    // Add logic for persona views if needed when they are shown
     if (viewName === 'personaView') {
-        // Potentially load data if editing an existing persona
-        // This is handled by setupPersonaListeners calling loadCurrentPersonaForEdit
         console.log("Persona Create/Edit view shown.");
     }
     if (viewName === 'personaListView') {
-        // Render the list when the view is shown
-        const { renderPersonaList } = await import('./personaManagement.js'); // Dynamic import if needed
-        renderPersonaList();
+        // Dynamic import for renderPersonaList to avoid circular dependencies if any, or just direct call
+        import('./personaManagement.js').then(personaManagement => {
+            personaManagement.renderPersonaList();
+        });
         console.log("Persona List view shown.");
     }
 }
 
-// Note: switchTab function is now moved to adDisplay.js
-// Note: copyToClipboard function is now moved to copyToClipboard.js
+// switchTab function removed as it's no longer needed.

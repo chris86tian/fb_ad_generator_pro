@@ -1,4 +1,3 @@
-```markdown
 # FB Ad Generator - Chrome Extension
 
 ## 🚀 Über das Projekt
@@ -100,5 +99,3 @@ Wenn dir diese Erweiterung gefällt und sie dir bei deiner Arbeit hilft, würde 
 ## Lizenz
 
 Dieses Projekt ist derzeit nicht unter einer spezifischen Lizenz veröffentlicht.
-
-```

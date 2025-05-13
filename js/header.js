@@ -1,67 +1,107 @@
+// This file handles the dynamic generation of headers for different views
+// and sets up event listeners for header controls
+
 import { showView } from './viewManagement.js';
-// Note: dom.js is not directly imported here to avoid circular dependencies if header.js is imported by dom.js or viewManagement.js
-// Instead, elements are queried within the provided headerElement.
 
-export function generateHeaderHtml(titleKey, showBackButton) {
-    const appName = chrome.i18n.getMessage('appName'); // Assuming 'appName' is the key for the main title
-    const viewTitle = titleKey === 'appName' ? appName : chrome.i18n.getMessage(titleKey);
-    const backButtonTitle = chrome.i18n.getMessage('backButton');
-
-    const archiveIconTitle = chrome.i18n.getMessage('archiveViewTitle');
-    const personasIconTitle = chrome.i18n.getMessage('personaListViewTitle');
-    const currentPersonaIconTitle = chrome.i18n.getMessage('currentPersonaViewTitle');
-    const infoIconTitle = chrome.i18n.getMessage('infoTitle');
-    const settingsIconTitle = chrome.i18n.getMessage('settingsTitle');
-
-    const globalIconsHtml = `
-        <span class="header-icon global-archive-icon" title="${archiveIconTitle}">🗃️</span>
-        <span class="header-icon global-personas-icon" title="${personasIconTitle}">👥</span>
-        <span class="header-icon global-current-persona-icon" title="${currentPersonaIconTitle}">👤</span>
-        <span class="header-icon global-info-icon" title="${infoIconTitle}">ℹ️</span>
-        <span class="header-icon global-settings-icon" title="${settingsIconTitle}">⚙️</span>
-    `;
-
-    let headerHtml = `<div class="header">`;
-
-    if (showBackButton) {
-        headerHtml += `<span class="back-icon" title="${backButtonTitle}">⬅️</span>`;
-    }
-
-    if (titleKey === 'appName') { // Special handling for the main view's header
-        headerHtml += `
-            <span class="header-title">${viewTitle}</span>
-            <div class="design-by-link">
-                <a href="https://www.lipalife.de" target="_blank" data-i18n-key="designByLinkText">${chrome.i18n.getMessage('designByLinkText')}</a>
+// Generate HTML for the header based on the view
+export function generateHeaderHtml(titleKey, showBackButton = true) {
+    // Get translated title text
+    let titleText = chrome.i18n.getMessage(titleKey) || 'FB Ad Filler';
+    
+    // Special case for main view which includes the "Design by" link
+    const isMainView = titleKey === 'appName';
+    const designByHtml = isMainView ? 
+        `<span class="design-by-link">
+            <a href="https://lipa.life" target="_blank" data-i18n-key="designByText">Design by Lipa LIFE</a>
+        </span>` : '';
+    
+    // Back button HTML if needed
+    const backButtonHtml = showBackButton ? 
+        `<div class="back-icon" title="${chrome.i18n.getMessage('backButton') || 'Back'}">
+            ←
+        </div>` : '';
+    
+    // Header controls for main view only
+    const headerControlsHtml = isMainView ? 
+        `<div class="header-controls">
+            <div class="header-icon" id="personaBtn" title="${chrome.i18n.getMessage('personaButtonTitle') || 'Create/Edit Persona'}">
+                👤
             </div>
-        `;
-    } else {
-        headerHtml += `<span class="header-title">${viewTitle}</span>`;
-    }
-
-    headerHtml += `
-            <div class="header-controls">
-                ${globalIconsHtml}
+            <div class="header-icon" id="personaListBtn" title="${chrome.i18n.getMessage('personaListButtonTitle') || 'Persona List'}">
+                👥
             </div>
+            <div class="header-icon" id="archiveBtn" title="${chrome.i18n.getMessage('archiveButtonTitle') || 'Archive'}">
+                🗃️
+            </div>
+            <div class="header-icon" id="infoBtn" title="${chrome.i18n.getMessage('infoButtonTitle') || 'Info'}">
+                ℹ️
+            </div>
+            <div class="header-icon" id="settingsBtn" title="${chrome.i18n.getMessage('settingsButtonTitle') || 'Settings'}">
+                ⚙️
+            </div>
+        </div>` : '';
+    
+    // Assemble the complete header HTML
+    return `
+        <div class="header">
+            ${backButtonHtml}
+            <div class="header-title" data-i18n-key="${titleKey}">${titleText}</div>
+            ${designByHtml}
+            ${headerControlsHtml}
         </div>
     `;
-    return headerHtml;
 }
 
+// Add event listeners to header elements
 export function addHeaderEventListeners(headerElement) {
-    if (!headerElement) return;
-
-    const backIcon = headerElement.querySelector('.back-icon');
-    if (backIcon) {
-        backIcon.addEventListener('click', () => showView('main'));
+    // Back button
+    const backButton = headerElement.querySelector('.back-icon');
+    if (backButton) {
+        backButton.addEventListener('click', () => {
+            // Determine which view to go back to based on current view
+            const currentView = headerElement.closest('[id$="View"]');
+            if (currentView) {
+                const viewId = currentView.id;
+                
+                if (viewId === 'personaListView') {
+                    showView('main');
+                } else if (viewId === 'personaView') {
+                    showView('main');
+                } else {
+                    // Default back behavior for other views
+                    showView('main');
+                }
+            } else {
+                console.warn('Could not determine current view for back button');
+                showView('main');
+            }
+        });
     }
-
-    headerElement.querySelector('.global-archive-icon')?.addEventListener('click', () => showView('archive'));
-    headerElement.querySelector('.global-personas-icon')?.addEventListener('click', () => showView('personaListView'));
-    headerElement.querySelector('.global-current-persona-icon')?.addEventListener('click', () => {
-        // This will show the persona view, and showView will handle calling
-        // loadCurrentPersonaForEdit(null) which in turn calls clearPersonaCreationFields.
-        showView('persona');
-    });
-    headerElement.querySelector('.global-info-icon')?.addEventListener('click', () => showView('info'));
-    headerElement.querySelector('.global-settings-icon')?.addEventListener('click', () => showView('options'));
+    
+    // Main view header controls
+    const personaBtn = headerElement.querySelector('#personaBtn');
+    const personaListBtn = headerElement.querySelector('#personaListBtn');
+    const archiveBtn = headerElement.querySelector('#archiveBtn');
+    const infoBtn = headerElement.querySelector('#infoBtn');
+    const settingsBtn = headerElement.querySelector('#settingsBtn');
+    
+    if (personaBtn) {
+        personaBtn.addEventListener('click', () => showView('persona'));
+    }
+    
+    if (personaListBtn) {
+        personaListBtn.addEventListener('click', () => showView('personaListView'));
+    }
+    
+    if (archiveBtn) {
+        archiveBtn.addEventListener('click', () => showView('archive'));
+    }
+    
+    if (infoBtn) {
+        infoBtn.addEventListener('click', () => showView('info'));
+    }
+    
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => showView('options'));
+    }
 }

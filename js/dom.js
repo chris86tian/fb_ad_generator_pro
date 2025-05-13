@@ -1,72 +1,95 @@
-/* Main View Elements */
+// DOM element references for the extension
+// This centralizes all DOM element references to avoid scattered querySelector calls
+
+// Main view elements
 export const mainView = document.getElementById('mainView');
-export const inputContent = document.getElementById('inputContent');
+export const optionsView = document.getElementById('optionsView');
+export const infoView = document.getElementById('infoView');
+export const archiveView = document.getElementById('archiveView');
+export const personaView = document.getElementById('personaView');
+export const personaListView = document.getElementById('personaListView');
+
+// Navigation buttons
+export const backToMainBtnFromOptions = document.querySelector('#optionsView .back-icon');
+export const backToMainBtnFromInfo = document.querySelector('#infoView .back-icon');
+export const backToMainBtnFromArchive = document.querySelector('#archiveView .back-icon');
+export const backToMainBtnFromPersona = document.querySelector('#personaView .back-icon');
+export const backToPersonaViewBtn = document.querySelector('#personaListView .back-icon');
+
+// Input section elements
 export const copywriterSelect = document.getElementById('copywriterSelect');
 export const formOfAddressSelect = document.getElementById('formOfAddressSelect');
+export const inputContent = document.getElementById('inputContent');
 export const generateBtn = document.getElementById('generateBtn');
 export const resetBtn = document.getElementById('resetBtn');
 export const saveToArchiveBtn = document.getElementById('saveToArchiveBtn');
-export const viewArchiveBtn = document.getElementById('viewArchiveBtn'); // Button in main content area
+export const changePersonaBtn = document.getElementById('changePersonaBtn');
+export const activePersonaDisplay = document.getElementById('activePersonaDisplay');
 
+// Preview section elements
 export const primaryTextField = document.getElementById('primaryText');
 export const headlineField = document.getElementById('headline');
 export const descriptionField = document.getElementById('description');
-
 export const copyPrimaryTextBtn = document.getElementById('copyPrimaryTextBtn');
 export const copyHeadlineBtn = document.getElementById('copyHeadlineBtn');
 export const copyDescriptionBtn = document.getElementById('copyDescriptionBtn');
 
+// Tab container and content elements
 export const multiVersionTabsContainer = document.getElementById('multiVersionTabsContainer');
-export const primaryTextsTabContent = document.getElementById('primaryTextsTabContent');
-export const headlinesTabContent = document.getElementById('headlinesTabContent');
-export const descriptionsTabContent = document.getElementById('descriptionsTabContent');
-export const tabLinks = document.querySelectorAll('.tab-navigation .tab-link');
-export const tabContentsArr = document.querySelectorAll('.tab-content');
+export const allVersionsTabContent = document.getElementById('allVersionsTabContent');
 
-/* Options View Elements */
-export const optionsView = document.getElementById('optionsView');
+// Options view elements
 export const apiKeyInput = document.getElementById('apiKeyInput');
 export const modelSelect = document.getElementById('modelSelect');
 export const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-export const backToMainBtnFromOptions = document.getElementById('backToMainBtnFromOptions');
 
-/* Info View Elements */
-export const infoView = document.getElementById('infoView');
+// Info view elements
 export const systemPromptDisplay = document.getElementById('systemPromptDisplay');
-export const backToMainBtnFromInfo = document.getElementById('backToMainBtnFromInfo');
 
-/* Archive View Elements */
-export const archiveView = document.getElementById('archiveView');
+// Archive view elements
 export const archiveListContainer = document.getElementById('archiveListContainer');
 export const emptyArchiveMessage = document.getElementById('emptyArchiveMessage');
-export const backToMainBtnFromArchive = document.getElementById('backToMainBtnFromArchive');
 
-/* Persona View Elements (Create/Edit) */
-export const personaView = document.getElementById('personaView');
+// Persona view elements
 export const personaBaseDescription = document.getElementById('personaBaseDescription');
 export const generatePersonaBtn = document.getElementById('generatePersonaBtn');
-export const generatedPersonaContainer = document.getElementById('generatedPersonaContainer');
 export const generatedPersonaText = document.getElementById('generatedPersonaText');
-export const personaLoadingErrorPlaceholder = document.getElementById('personaLoadingErrorPlaceholder');
 export const saveCurrentPersonaBtn = document.getElementById('saveCurrentPersonaBtn');
-export const backToMainBtnFromPersona = document.getElementById('backToMainBtnFromPersona');
+export const personaLoadingErrorPlaceholder = document.getElementById('personaLoadingErrorPlaceholder');
 
-/* Persona List View Elements */
-export const personaListView = document.getElementById('personaListView');
+// Persona list view elements
 export const personaListContainer = document.getElementById('personaListContainer');
 export const emptyPersonaListMessage = document.getElementById('emptyPersonaListMessage');
 export const createNewPersonaBtn = document.getElementById('createNewPersonaBtn');
-// export const backToPersonaViewBtn = document.getElementById('backToPersonaViewBtn'); // Replaced by backToMainBtnFromPersonaList
-export const backToMainBtnFromPersonaList = document.getElementById('backToMainBtnFromPersonaList'); // New back button for persona list view
 
-/* Active Persona Display in Main View */
-export const activePersonaDisplayContainer = document.getElementById('activePersonaDisplayContainer');
-export const activePersonaDisplay = document.getElementById('activePersonaDisplay');
-export const changePersonaBtn = document.getElementById('changePersonaBtn');
+// Function to ensure all DOM elements are available
+export function validateDomElements() {
+    const criticalElements = [
+        { name: 'mainView', element: mainView },
+        { name: 'optionsView', element: optionsView },
+        { name: 'infoView', element: infoView },
+        { name: 'archiveView', element: archiveView },
+        { name: 'personaView', element: personaView },
+        { name: 'personaListView', element: personaListView },
+        { name: 'copywriterSelect', element: copywriterSelect },
+        { name: 'formOfAddressSelect', element: formOfAddressSelect },
+        { name: 'inputContent', element: inputContent },
+        { name: 'generateBtn', element: generateBtn },
+        { name: 'resetBtn', element: resetBtn },
+        { name: 'primaryTextField', element: primaryTextField },
+        { name: 'headlineField', element: headlineField },
+        { name: 'descriptionField', element: descriptionField },
+        { name: 'multiVersionTabsContainer', element: multiVersionTabsContainer },
+        { name: 'allVersionsTabContent', element: allVersionsTabContent }
+    ];
 
-/* Global Header Icons */
-export const globalArchiveIcon = document.getElementById('globalArchiveIcon');
-export const globalPersonasIcon = document.getElementById('globalPersonasIcon'); // Icon for Persona List View (👥)
-export const globalCurrentPersonaIcon = document.getElementById('globalCurrentPersonaIcon'); // Icon for Persona Create/Edit View (👤)
-export const globalInfoIcon = document.getElementById('globalInfoIcon');
-export const globalSettingsIcon = document.getElementById('globalSettingsIcon');
+    let missingElements = criticalElements.filter(item => !item.element);
+    
+    if (missingElements.length > 0) {
+        console.error('Missing critical DOM elements:', missingElements.map(item => item.name).join(', '));
+        return false;
+    }
+    
+    console.log('All critical DOM elements are available.');
+    return true;
+}

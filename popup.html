@@ -309,7 +309,7 @@
     }
 
 
-    #multiVersionTabsContainer {
+    #multiVersionTabsContainer { /* Renamed conceptually, but ID can remain for now if too many JS changes */
       margin-top: 15px;
       border: 1px solid var(--tab-border);
       border-radius: 6px;
@@ -317,68 +317,74 @@
       flex-grow: 1;
       display: flex;
       flex-direction: column;
-      min-height: 200px;
+      min-height: 200px; /* Adjust as needed */
     }
+    /* Tab navigation is removed, so these styles are no longer needed or need adjustment */
     .tab-navigation {
-      display: flex;
-      border-bottom: 1px solid var(--tab-border);
+      /* display: flex; */ /* REMOVED */
+      /* border-bottom: 1px solid var(--tab-border); */ /* REMOVED */
     }
     .tab-link {
-      padding: 10px 15px;
-      cursor: pointer;
-      background-color: var(--tab-inactive-bg);
-      color: var(--tab-inactive-text);
-      border: none;
-      border-right: 1px solid var(--tab-border);
-      font-weight: 500;
-      font-size: 13px;
-      flex-grow: 1;
-      text-align: center;
-      border-radius: 0;
+      /* Styles for tab links - REMOVED */
     }
-    .tab-link:first-child {
-        border-top-left-radius: 5px;
-    }
-    .tab-link:last-child {
-      border-right: none;
-      border-top-right-radius: 5px;
-    }
-    .tab-link.active {
-      background-color: var(--tab-active-bg);
-      color: var(--tab-active-text);
-      border-bottom: 2px solid var(--primary-blue);
-      margin-bottom: -1px;
-    }
-    .tab-content {
+    .tab-content { /* This class is still used for #allVersionsTabContent */
       padding: 15px;
-      display: none;
+      /* display: none; */ /* Will be always displayed if active */
       overflow-y: auto;
       flex-grow: 1;
-      max-height: 300px;
+      /* max-height: 300px; */ /* Adjusted in element style or here if needed */
     }
     .tab-content.active {
       display: block;
     }
-    .version-item {
+    .version-item { /* Styles for individual Primary Text / Headline / Description items */
       margin-bottom: 12px;
       padding: 10px;
-      background: var(--light-gray-bg);
+      background: var(--light-gray-bg); /* Default for items */
       border: 1px solid #e5e7eb;
       border-radius: 6px;
     }
     .version-item .preview-box-header strong {
       font-size: 0.9em;
     }
-    /* This targets the non-editable text display within version items specifically */
     .version-item .text-content-display {
       font-size: 0.9em;
       color: var(--text-light);
       white-space: pre-wrap;
       word-wrap: break-word;
       margin-top: 5px;
-      padding: 0; /* Reset padding if needed for tab items */
-      border: none; /* Ensure no border for tab items */
+      padding: 0;
+      border: none;
     }
+
+    /* New styles for version grouping */
+    .version-group {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f9fafb; /* Light background for the whole version block */
+      border: 1px solid var(--border-color);
+      border-radius: 8px; /* Slightly larger radius for group */
+    }
+    .version-group:last-child {
+      margin-bottom: 0;
+    }
+    .version-group-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary-blue);
+      margin-top: 0;
+      margin-bottom: 15px; /* Increased margin */
+      padding-bottom: 10px; /* Increased padding */
+      border-bottom: 1px solid #e0e0e0; /* Slightly different border */
+    }
+    .version-group .version-item {
+      background-color: var(--white); /* Ensure items within group have distinct white background */
+      margin-bottom: 10px; /* Consistent margin for items within a group */
+    }
+    .version-group .version-item:last-child {
+      margin-bottom: 0;
+    }
+
 
     #optionsView .content-wrapper, #infoView .content-wrapper, #archiveView .content-wrapper, #personaView .content-wrapper, #personaListView .content-wrapper {
       display: flex;
@@ -728,21 +734,15 @@
             </div>
 
             <div id="multiVersionTabsContainer" style="margin-top: 15px; display: none;">
-              <div class="tab-navigation">
-                <button class="tab-link active" data-tab="primaryTextsTabContent" data-i18n-key="tabPrimaryTexts">Primary Texts</button>
-                <button class="tab-link" data-tab="headlinesTabContent" data-i18n-key="tabHeadlines">Headlines</button>
-                <button class="tab-link" data-tab="descriptionsTabContent" data-i18n-key="tabDescriptions">Descriptions</button>
-              </div>
-
-              <div id="primaryTextsTabContent" class="tab-content active">
+              <!-- Tab navigation removed -->
+              <h3 class="section-title" style="padding: 15px 15px 0 15px; margin-bottom: 0; font-size: 15px;"> <!-- Adjusted font-size -->
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <span data-i18n-key="allAdVariantsTitle">Alle Anzeigenvarianten</span>
+              </h3>
+              <div id="allVersionsTabContent" class="tab-content active" style="border-top: 1px solid var(--tab-border); margin-top: 10px; max-height: 400px; overflow-y: auto;"> <!-- max-height can be adjusted -->
                 <p data-i18n-key="tabGenerateAdCopyMessage">Generate ad copy to see versions here.</p>
               </div>
-              <div id="headlinesTabContent" class="tab-content">
-                 <p data-i18n-key="tabGenerateAdCopyMessage">Generate ad copy to see versions here.</p>
-              </div>
-              <div id="descriptionsTabContent" class="tab-content">
-                 <p data-i18n-key="tabGenerateAdCopyMessage">Generate ad copy to see versions here.</p>
-              </div>
+              <!-- headlinesTabContent and descriptionsTabContent removed -->
             </div>
 
           </div>
